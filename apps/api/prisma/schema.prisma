@@ -13,6 +13,7 @@ model User {
   updatedAt     DateTime    @updatedAt
 
   name          String?
+  image          String?
   
   Credentials   Credentials?
   AuthProvider  AuthProvider?
