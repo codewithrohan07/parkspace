@@ -3,10 +3,10 @@ import { UsersService } from './users.service'
 import { User } from './entity/user.entity'
 import { FindManyUserArgs, FindUniqueUserArgs } from './dtos/find.args'
 import {
-  RegisterWithProviderInput,
-  RegisterWithCredentialsInput,
-  LoginOutput,
   LoginInput,
+  LoginOutput,
+  RegisterWithCredentialsInput,
+  RegisterWithProviderInput,
 } from './dtos/create-user.input'
 import { UpdateUserInput } from './dtos/update-user.input'
 import { checkRowLevelPermission } from 'src/common/auth/util'
@@ -23,16 +23,15 @@ export class UsersResolver {
 
   @Mutation(() => User)
   async registerWithCredentials(
-    @Args('RegisterWithCredentialsInput')
+    @Args('registerWithCredentialsInput')
     args: RegisterWithCredentialsInput,
   ) {
     return this.usersService.registerWithCredentials(args)
   }
 
   @Mutation(() => User)
-  async registerUserWithProvider(
-    @Args('RegisterWithProviderInput')
-    args: RegisterWithProviderInput,
+  async registerWithProvider(
+    @Args('registerWithProviderInput') args: RegisterWithProviderInput,
   ) {
     return this.usersService.registerWithProvider(args)
   }
