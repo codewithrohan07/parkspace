@@ -8,6 +8,10 @@ type User {
   uid: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  admin: Admin
+  manager: Manager
+  valet: Valet
+  customer: Customer
 }
 
 """
@@ -15,25 +19,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type AggregateCountOutput {
-  count: Int!
-}
-
 type LoginOutput {
   token: String!
+  user: User!
 }
 
 type Admin {
   createdAt: DateTime!
   updatedAt: DateTime!
   uid: String!
-}
-
-type Customer {
-  displayName: String
-  uid: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  user: User
+  verifications: [Verification!]!
+  verificationsCount: Int!
 }
 
 type Manager {
@@ -42,6 +39,7 @@ type Manager {
   createdAt: DateTime!
   updatedAt: DateTime!
   companyId: Int!
+  company: Company
 }
 
 type Valet {
@@ -54,52 +52,21 @@ type Valet {
   licenceID: String!
 }
 
-type Company {
+type Customer {
   displayName: String
-  description: String
-  id: Int!
+  uid: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  user: User
+  bookings: [Booking!]!
 }
 
-type Garage {
-  displayName: String
-  description: String
-  id: Int!
+type Verification {
   createdAt: DateTime!
-  updatedAt: DateTime!
-  companyId: Int!
-  images: [String!]!
-}
-
-type Address {
-  garageId: Int
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  id: Int!
-  address: String!
-  lat: Int!
-  lng: Int!
-}
-
-type Slot {
-  displayName: String
-  length: Int
-  width: Int
-  height: Int
-  type: SlotType!
-  id: Int!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  pricePerHour: Int!
   garageId: Int!
-}
-
-enum SlotType {
-  CAR
-  HEAVY
-  BIKE
-  BICYCLE
+  updatedAt: DateTime!
+  verified: Boolean!
+  adminId: String!
 }
 
 type Booking {
@@ -118,7 +85,6 @@ type Booking {
   customerId: String!
   slot: Slot!
   customer: Customer!
-  bookingTimeline: [BookingTimeline!]!
   valetAssignment: ValetAssignment
 }
 
@@ -132,6 +98,63 @@ enum BookingStatus {
   VALET_RETURNED
 }
 
+type Company {
+  displayName: String
+  description: String
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  garages: [Garage!]!
+  managers: [Manager!]!
+}
+
+type Garage {
+  displayName: String
+  description: String
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  companyId: Int!
+  images: [String!]!
+  verification: Verification
+  company: Company!
+  address: Address
+  slots: [Slot!]!
+}
+
+type Slot {
+  displayName: String
+  length: Int
+  width: Int
+  height: Int
+  type: SlotType!
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  pricePerHour: Int!
+  garageId: Int!
+  garage: Garage!
+  bookings: [Booking!]!
+}
+
+enum SlotType {
+  CAR
+  HEAVY
+  BIKE
+  BICYCLE
+}
+
+type Address {
+  garageId: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  id: Int!
+  address: String!
+  lat: Int!
+  lng: Int!
+  garage: Garage
+}
+
 type ValetAssignment {
   returnLat: Int
   returnLng: Int
@@ -142,6 +165,8 @@ type ValetAssignment {
   pickupLng: Int!
   pickupValetId: String!
   returnValetId: String!
+  pickupValet: Valet
+  returnValet: Valet
 }
 
 type BookingTimeline {
@@ -161,14 +186,6 @@ type Review {
   rating: Int!
   customerId: String!
   garageId: Int!
-}
-
-type Verification {
-  createdAt: DateTime!
-  garageId: Int!
-  updatedAt: DateTime!
-  verified: Boolean!
-  adminId: String!
 }
 
 type Query {
@@ -192,10 +209,6 @@ type Query {
   slots(distinct: [SlotScalarFieldEnum!], where: SlotWhereInput, orderBy: [SlotOrderByWithRelationInput!], cursor: SlotWhereUniqueInput, take: Int, skip: Int): [Slot!]!
   slot(where: SlotWhereUniqueInput!): Slot!
   bookings(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Int, skip: Int): [Booking!]!
-  bookingsForValet(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Int, skip: Int): [Booking!]!
-  bookingsForCustomer(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Int, skip: Int): [Booking!]!
-  bookingsForGarage(distinct: [BookingScalarFieldEnum!], where: BookingWhereInput, orderBy: [BookingOrderByWithRelationInput!], cursor: BookingWhereUniqueInput, take: Int, skip: Int): [Booking!]!
-  bookingsCount(where: BookingWhereInput): AggregateCountOutput!
   booking(where: BookingWhereUniqueInput!): Booking!
   valetAssignments(distinct: [ValetAssignmentScalarFieldEnum!], where: ValetAssignmentWhereInput, orderBy: [ValetAssignmentOrderByWithRelationInput!], cursor: ValetAssignmentWhereUniqueInput, take: Int, skip: Int): [ValetAssignment!]!
   valetAssignment(where: ValetAssignmentWhereUniqueInput!): ValetAssignment!

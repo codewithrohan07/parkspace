@@ -5,13 +5,13 @@ import {
 } from '@nestjs/common'
 import { FindManyUserArgs, FindUniqueUserArgs } from './dtos/find.args'
 import { PrismaService } from 'src/common/prisma/prisma.service'
-import { UpdateUserInput } from './dtos/update-user.input'
 import {
-  RegisterWithProviderInput,
-  RegisterWithCredentialsInput,
   LoginInput,
   LoginOutput,
+  RegisterWithCredentialsInput,
+  RegisterWithProviderInput,
 } from './dtos/create-user.input'
+import { UpdateUserInput } from './dtos/update-user.input'
 import * as bcrypt from 'bcryptjs'
 import { v4 as uuid } from 'uuid'
 import { JwtService } from '@nestjs/jwt'
@@ -25,11 +25,13 @@ export class UsersService {
   registerWithProvider({ image, name, uid, type }: RegisterWithProviderInput) {
     return this.prisma.user.create({
       data: {
-        image,
-        name,
         uid,
+        name,
+        image,
         AuthProvider: {
-          create: { type },
+          create: {
+            type,
+          },
         },
       },
     })
@@ -44,11 +46,14 @@ export class UsersService {
     const existingUser = await this.prisma.credentials.findUnique({
       where: { email },
     })
+
     if (existingUser) {
-      throw new BadRequestException('Email already exists.')
+      throw new BadRequestException('User already exists with this email.')
     }
-    const salt = await bcrypt.genSaltSync()
-    const passwordHash = await bcrypt.hashSync(password, salt)
+
+    // Hash the password
+    const salt = bcrypt.genSaltSync()
+    const passwordHash = bcrypt.hashSync(password, salt)
 
     const uid = uuid()
 
@@ -105,7 +110,7 @@ export class UsersService {
       },
     )
 
-    return { token: jwtToken }
+    return { token: jwtToken, user }
   }
 
   findAll(args: FindManyUserArgs) {
