@@ -1,0 +1,30 @@
+{
+  "name": "parkspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "libs/*"
+    ],
+    "nohoist": [
+      "**/@nestjs",
+      "**/@nestjs/**"
+    ]
+  },
+  "scripts": {
+    "format": "prettier \"{apps,libs}/**/*.{ts,tsx,js,json}\" --ignore-path .gitignore",
+    "format:check": "yarn format --check",
+    "format:write": "yarn format --write",
+    "tsc": "yarn nx run-many -t tsc",
+    "lint": "yarn nx run-many -t lint",
+    "build": "yarn nx run-many -t build",
+    "validate": "yarn format:write && yarn tsc && yarn lint && yarn build"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "nx": "20.0.3",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
